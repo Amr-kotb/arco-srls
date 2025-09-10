@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARCO SRLS - Attrezzi Cantiere 3</title>
+<style>
+body { margin:0;font-family:Arial,sans-serif;background-color:#0b1e3f;color:white;padding:20px; }
+h1{text-align:center;margin-bottom:30px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;}
+.card{background:#082b5c;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;padding:15px;text-align:center;min-height:260px;}
+.card img{width:100%;height:120px;object-fit:contain;background:#001933;border-radius:8px;margin-bottom:10px;}
+.card h2{margin:8px 0;font-size:18px;color:#fff;}
+.quantity-container{margin-top:auto;display:flex;justify-content:center;align-items:center;gap:8px;}
+.quantity-container button{background:#00ffaa;color:#003366;border:none;padding:6px 12px;font-size:16px;cursor:pointer;border-radius:6px;transition:0.3s;}
+.quantity-container button:hover{background:#00cc88;}
+.quantity-container input{width:45px;text-align:center;font-size:16px;border:2px solid #003366;border-radius:6px;}
+#riepilogo{margin-top:30px;padding:15px;background:#082b5c;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+#riepilogo h2{text-align:center;margin-bottom:15px;color:#00ffaa;}
+#riepilogo ul{list-style:none;padding:0;}
+#riepilogo li{margin:6px 0;font-size:16px;}
+.top-buttons { text-align:center; margin-bottom:20px; }
+.top-buttons button { margin: 0 5px; padding: 10px 20px; border: none; border-radius: 8px; background: #00ffaa; color: #0b1e3f; font-weight: bold; cursor: pointer; }
+.top-buttons button:hover { background: #00cc88; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;}
+  .quantity-container button, .quantity-container input{font-size:14px;padding:4px 8px;}
+  #riepilogo li{font-size:14px;}
+}
+@media (max-width: 480px) {
+  .grid{grid-template-columns:1fr;}
+  .top-buttons button{width:100%; margin:8px 0 0 0;}
+  h1{font-size:24px;}
+  #riepilogo li{font-size:13px;}
+}
+</style>
+</head>
+<body>
+
+<div class="top-buttons">
+  <button onclick="window.location.href='index.html'">🏠 Home Page</button>
+</div>
+
+<h1>CORTINA Attrezzi</h1>
+
+<div class="grid">
+  <div class="card">
+    <img src="/attrezzi/avvitatore.png" alt="Avvitatore">
+    <h2>Avvitatore</h2>
+    <div class="quantity-container"><button onclick="decrease(this)">-</button><input type="number" value="0" min="0"><button onclick="increase(this)">+</button></div>
+  </div>
+  <div class="card">
+    <img src="/attrezzi/trapano.png" alt="Trapano">
+    <h2>Trapano</h2>
+    <div class="quantity-container"><button onclick="decrease(this)">-</button><input type="number" value="0" min="0"><button onclick="increase(this)">+</button></div>
+  </div>
+  <div class="card">
+    <img src="/attrezzi/laser.png" alt="Laser">
+    <h2>Laser</h2>
+    <div class="quantity-container"><button onclick="decrease(this)">-</button><input type="number" value="0" min="0"><button onclick="increase(this)">+</button></div>
+  </div>
+  <div class="card">
+    <img src="/attrezzi/batteria.png" alt="Batteria">
+    <h2>Batteria</h2>
+    <div class="quantity-container"><button onclick="decrease(this)">-</button><input type="number" value="0" min="0"><button onclick="increase(this)">+</button></div>
+  </div>
+  <div class="card">
+    <img src="/attrezzi/caricabatteria.png" alt="Carica Batteria">
+    <h2>Carica Batteria</h2>
+    <div class="quantity-container"><button onclick="decrease(this)">-</button><input type="number" value="0" min="0"><button onclick="increase(this)">+</button></div>
+  </div>
+  <div class="card">
+    <img src="/attrezzi/seghetto.png" alt="Seghetto">
+    <h2>Seghetto</h2>
+    <div class="quantity-container"><button onclick="decrease(this)">-</button><input type="number" value="0" min="0"><button onclick="increase(this)">+</button></div>
+  </div>
+  <div class="card">
+    <img src="/attrezzi/sparachiodi.png" alt="Sparachiodi">
+    <h2>Sparachiodi</h2>
+    <div class="quantity-container"><button onclick="decrease(this)">-</button><input type="number" value="0" min="0"><button onclick="increase(this)">+</button></div>
+  </div>
+</div>
+
+<!-- Riepilogo locale -->
+<div id="riepilogo">
+  <h2>Riepilogo Quantità</h2>
+  <ul id="listaRiepilogo"></ul>
+</div>
+
+<script>
+const cantiereID = "cortina"; // ID unico cantiere
+const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi"];
+let savedQuantities = JSON.parse(localStorage.getItem('quantitaAttrezzi_' + cantiereID)) || {};
+
+// Inizializza gli attrezzi a 0 se non presenti
+attrezzi.forEach(att => { if(savedQuantities[att]===undefined) savedQuantities[att]=0; });
+
+// Imposta valori input
+document.querySelectorAll('.card').forEach(card => {
+  const name = card.querySelector('h2').textContent;
+  const input = card.querySelector('input');
+  if(savedQuantities[name]!==undefined) input.value = savedQuantities[name];
+});
+
+function saveQuantities() {
+  document.querySelectorAll('.card').forEach(card => {
+    const name = card.querySelector('h2').textContent;
+    const input = card.querySelector('input');
+    savedQuantities[name] = parseInt(input.value);
+  });
+  localStorage.setItem('quantitaAttrezzi_' + cantiereID, JSON.stringify(savedQuantities));
+  updateRiepilogo();
+}
+
+function increase(button){ const input=button.previousElementSibling; input.value=parseInt(input.value)+1; saveQuantities(); }
+function decrease(button){ const input=button.nextElementSibling; if(parseInt(input.value)>0){ input.value=parseInt(input.value)-1; saveQuantities(); } }
+
+function updateRiepilogo(){
+  const lista = document.getElementById('listaRiepilogo');
+  lista.innerHTML='';
+  attrezzi.forEach(att => {
+    lista.innerHTML += `<li><strong>${att}</strong>: ${savedQuantities[att]}</li>`;
+  });
+}
+
+// Aggiorna subito e ogni secondo
+updateRiepilogo();
+setInterval(updateRiepilogo,1000);
+</script>
+
+</body>
+</html>
