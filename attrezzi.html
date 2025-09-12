@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ARCO SRLS - Riepilogo Cantieri</title>
 <style>
-body { margin:0; font-family: Arial, sans-serif; background-color:#0b1e3f; color:white; padding:20px; }
+body { margin:0; font-family:Arial,sans-serif; background:#0b1e3f; color:white; padding:20px; }
 h1 { text-align:center; margin-bottom:30px; color:#00ffaa; }
 .riepilogo-cantieri { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
 .riepilogo-card { background:#082b5c; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.5); text-align:center; }
@@ -21,84 +21,54 @@ button:hover { background:#00cc88; }
 
 <div class="top-buttons">
   <button onclick="window.location.href='index.html'">🏠 Home Page</button>
-  <button onclick="updateRiepilogo()">Aggiorna Riepilogo</button>
 </div>
 
 <h1>Riepilogo Quantità Attrezzi - Tutti i Cantieri</h1>
-
 <div class="riepilogo-cantieri" id="riepilogoCantieri"></div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-<script>
-  // 🔹 Sostituisci con i tuoi dati di configurazione Firebase
-  const firebaseConfig = {
-    apiKey: "TUO_API_KEY",
-    authDomain: "TUO_PROGETTO.firebaseapp.com",
-    projectId: "TUO_PROGETTO",
-    storageBucket: "TUO_PROGETTO.appspot.com",
-    messagingSenderId: "xxx",
-    appId: "xxx"
-  };
+// 🔹 Config Firebase
+const firebaseConfig = {
+  apiKey: "TUO_API_KEY",
+  authDomain: "TUO_PROGETTO.firebaseapp.com",
+  projectId: "TUO_PROGETTO",
+  storageBucket: "TUO_PROGETTO.appspot.com",
+  messagingSenderId: "xxx",
+  appId: "xxx"
+};
 
-  // Inizializza Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  const cantieri = ["watt","commenda","cortina"];
-  const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi"];
-  const linkCantieri = { "watt": "watt.html", "commenda": "commenda.html", "cortina": "cortina.html" };
+const cantieri = ["watt","commenda","cortina"];
+const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi"];
+const linkCantieri = { "watt": "watt.html", "commenda": "commenda.html", "cortina": "cortina.html" };
 
-  // 🔹 Prende i dati dal database
-  async function getQuantities(cantiere){
-    const docRef = db.collection("cantieri").doc(cantiere);
-    const docSnap = await docRef.get();
-    let data = {};
-    if(docSnap.exists){
-      data = docSnap.data();
-    }
-    // Assicura che ci siano tutti gli attrezzi
-    attrezzi.forEach(att => { if(!(att in data)) data[att] = 0; });
-    return data;
-  }
+const container = document.getElementById('riepilogoCantieri');
 
-  // 🔹 Aggiorna il riepilogo sul sito
-  async function updateRiepilogo(){
-    const container = document.getElementById('riepilogoCantieri');
-    container.innerHTML = '';
-    for(const cantiere of cantieri){
-      const data = await getQuantities(cantiere);
-      const card = document.createElement('div');
+cantieri.forEach(cantiere => {
+  const docRef = doc(db, "cantieri", cantiere);
+  onSnapshot(docRef, snap => {
+    let data = snap.exists() ? snap.data() : {};
+    attrezzi.forEach(att => { if(!(att in data)) data[att]=0; });
+
+    let card = document.getElementById(`card-${cantiere}`);
+    if(!card){
+      card = document.createElement('div');
+      card.id = `card-${cantiere}`;
       card.className = 'riepilogo-card';
-      let html = `<h3>${cantiere.toUpperCase()}</h3><ul>`;
-      attrezzi.forEach(att => {
-        html += `<li><strong>${att}</strong>: `;
-        const attData = data[att];
-        if(!attData){
-          html += '0';
-        } else if(typeof attData === 'number'){
-          html += attData; // vecchio formato numerico
-        } else {
-          const utenti = [];
-          for(const [utente, qty] of Object.entries(attData)){
-            utenti.push(`${utente} (${qty})`);
-          }
-          html += utenti.join(', ');
-        }
-        html += `</li>`;
-      });
-      html += `</ul><button onclick="window.location.href='${linkCantieri[cantiere]}'">Vai a ${cantiere.toUpperCase()}</button>`;
-      card.innerHTML = html;
       container.appendChild(card);
     }
-  }
 
-  // 🔹 Aggiorna subito e poi ogni 2 secondi
-  updateRiepilogo();
-  setInterval(updateRiepilogo, 2000);
+    let html = `<h3>${cantiere.toUpperCase()}</h3><ul>`;
+    attrezzi.forEach(att => html += `<li><strong>${att}</strong>: ${data[att]}</li>`);
+    html += `</ul><button onclick="window.location.href='${linkCantieri[cantiere]}'">Vai a ${cantiere.toUpperCase()}</button>`;
+    card.innerHTML = html;
+  });
+});
 </script>
-
 </body>
 </html>
