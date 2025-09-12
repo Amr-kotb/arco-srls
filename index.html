@@ -1,243 +1,140 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARCO SRLS - Costruzioni</title>
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0b1e3f;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    overflow: hidden;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARCO SRLS - Gestione Cantieri</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0b1e3f;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-  /* Canvas sfondo */
-  #bgCanvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-  }
-
-  /* Scritta centrale con effetto macchina da scrivere */
-  .center-wrapper {
-    font-size: 72px;
-    font-weight: bold;
-    margin-bottom: 60px;
-    text-align: center;
-    padding: 0 10px;
-    word-wrap: break-word;
-  }
-
-  .cursor {
-    display: inline-block;
-    width: 3px;
-    height: 1em;
-    background: white;
-    margin-left: 5px;
-    animation: blink 0.7s infinite;
-    vertical-align: bottom;
-  }
-  @keyframes blink {
-    50% { background: transparent; }
-  }
-
-  /* Container box */
-  .container {
-    display: flex;
-    gap: 40px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .box {
-    width: 220px;
-    height: 220px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 26px;
-    font-weight: bold;
-    color: #fff;
-    box-shadow: 0 0 20px rgba(0,255,170,0.5);
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-    text-align: center;
-    padding: 10px;
-  }
-
-  .box:hover {
-    transform: perspective(500px) rotateY(10deg) scale(1.05);
-    box-shadow: 0 0 30px rgba(0,255,170,0.8);
-  }
-
-  /* Footer */
-  footer {
-    position: fixed;
-    bottom: 10px;
-    width: 100%;
-    text-align: center;
-    color: #aaa;
-    font-size: 14px;
-  }
-
-  /* --- Stili responsivi --- */
-  @media (max-width: 768px) {
-    .center-wrapper {
+    h1 {
+      margin: 40px 0;
       font-size: 42px;
-      margin-bottom: 40px;
+      color: #00ffaa;
+      text-align: center;
     }
-    .box {
-      width: 160px;
-      height: 160px;
-      font-size: 20px;
-    }
-  }
 
-  @media (max-width: 480px) {
-    .center-wrapper {
-      font-size: 28px;
+    /* Layout generale */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 95%;
+      max-width: 1000px;
+      margin-bottom: 60px;
+    }
+
+    /* Riga superiore con 3 cantieri */
+    .row-top {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      width: 100%;
       margin-bottom: 30px;
     }
-    .container {
-      flex-direction: column;
-      gap: 20px;
-      align-items: center;
+
+    /* Riga inferiore con 2 cantieri centrati */
+    .row-bottom {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      flex-wrap: wrap;
+      width: 100%;
     }
+
     .box {
-      width: 80%;
-      height: 120px;
-      font-size: 18px;
+      background-color: #082b5c;
+      color: white;
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      flex: 1;
+      max-width: 250px;
     }
+
+    .box:hover {
+      background-color: #00ffaa;
+      color: #003366;
+      transform: scale(1.05);
+    }
+
+    .box .icon {
+      font-size: 40px;
+      margin-bottom: 15px;
+    }
+
+    /* Footer */
     footer {
-      font-size: 12px;
+      background-color: #082b5c;
+      color: white;
+      padding: 20px 0;
+      text-align: center;
+      width: 100%;
+      margin-top: auto;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.4);
     }
-  }
-</style>
+  </style>
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
+<h1>🏗️ Cantieri Attivi</h1>
 
-<!-- Scritta centrale -->
-<div class="center-wrapper">
-  <span id="centerText"></span><span class="cursor"></span>
-</div>
-
-<!-- Box -->
 <div class="container">
-  <div class="box" onclick="location.href='cantiere.html'">Cantiere</div>
-  <div class="box" onclick="location.href='attrezzi.html'">Attrezzi Quantità</div>
+
+  <!-- Riga superiore: 3 cantieri -->
+  <div class="row-top">
+    <div class="box" onclick="location.href='cantieri/watt.html'">
+      <div class="icon">⚡</div>
+      <div>Watt</div>
+    </div>
+
+    <div class="box" onclick="location.href='cantieri/commenda.html'">
+      <div class="icon">🏠</div>
+      <div>Commenda</div>
+    </div>
+
+    <div class="box" onclick="location.href='cantieri/cortina.html'">
+      <div class="icon">🏔️</div>
+      <div>Cortina</div>
+    </div>
+  </div>
+
+  <!-- Riga inferiore: 2 cantieri centrati -->
+  <div class="row-bottom">
+    <div class="box" onclick="location.href='cantieri/gioia.html'">
+      <div class="icon">🌇</div>
+      <div>Gioia</div>
+    </div>
+
+    <div class="box" onclick="location.href='cantieri/mind.html'">
+      <div class="icon">💡</div>
+      <div>Mind</div>
+    </div>
+  </div>
+
 </div>
 
-<footer>© 2025 ARCO SRLS - Tutti i diritti riservati</footer>
-
-<script>
-  // --- Scritta centrale effetto macchina da scrivere ---
-  const centerText = document.getElementById('centerText');
-  const words = ["RIPA", "ARCO SRLS"];
-  let wordIndex = 0;
-  let charIndex = 0;
-  let deleting = false;
-  const speed = 150;
-
-  function typeEffect() {
-    const currentWord = words[wordIndex];
-    if (!deleting) {
-      centerText.textContent = currentWord.slice(0, charIndex + 1);
-      charIndex++;
-      if (charIndex === currentWord.length) {
-        deleting = true;
-        setTimeout(typeEffect, 1000);
-        return;
-      }
-    } else {
-      centerText.textContent = currentWord.slice(0, charIndex - 1);
-      charIndex--;
-      if (charIndex === 0) {
-        deleting = false;
-        wordIndex = (wordIndex + 1) % words.length;
-      }
-    }
-    setTimeout(typeEffect, speed);
-  }
-  typeEffect();
-
-  // --- Sfondo triangoli collegati ---
-  const canvas = document.getElementById('bgCanvas');
-  const ctx = canvas.getContext('2d');
-  let points = [];
-
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  function initPoints(num) {
-    points = [];
-    for (let i = 0; i < num; i++) {
-      points.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5
-      });
-    }
-  }
-
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // muovi punti
-    points.forEach(p => {
-      p.x += p.vx;
-      p.y += p.vy;
-      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-
-      // disegna punto
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(0,255,170,0.7)';
-      ctx.fill();
-    });
-
-    // disegna linee tra punti vicini
-    for (let i = 0; i < points.length; i++) {
-      for (let j = i+1; j < points.length; j++) {
-        const dx = points[i].x - points[j].x;
-        const dy = points[i].y - points[j].y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 120) {
-          ctx.beginPath();
-          ctx.moveTo(points[i].x, points[i].y);
-          ctx.lineTo(points[j].x, points[j].y);
-          ctx.strokeStyle = 'rgba(0,255,170,0.2)';
-          ctx.stroke();
-        }
-      }
-    }
-
-    requestAnimationFrame(animate);
-  }
-
-  initPoints(60);
-  animate();
-</script>
+<footer>
+  <div>© 2025 ARCO SRLS - Tutti i diritti riservati</div>
+</footer>
 
 </body>
 </html>
