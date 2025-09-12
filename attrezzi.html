@@ -15,19 +15,6 @@ h1 { text-align:center; margin-bottom:30px; color:#00ffaa; }
 button { margin:10px 5px 0 0; padding:10px 20px; border:none; border-radius:8px; background:#00ffaa; color:#0b1e3f; font-weight:bold; cursor:pointer; }
 button:hover { background:#00cc88; }
 .top-buttons { text-align:center; margin-bottom:20px; }
-
-/* Responsive */
-@media (max-width: 768px) {
-  .riepilogo-cantieri { grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:15px; }
-  button { padding:8px 16px; font-size:14px; }
-  .riepilogo-card li { font-size:14px; }
-}
-@media (max-width: 480px) {
-  .riepilogo-cantieri { grid-template-columns: 1fr; }
-  button { width: 100%; margin:8px 0 0 0; }
-  .riepilogo-card li { font-size:13px; }
-  h1 { font-size:24px; }
-}
 </style>
 </head>
 <body>
@@ -41,35 +28,75 @@ button:hover { background:#00cc88; }
 
 <div class="riepilogo-cantieri" id="riepilogoCantieri"></div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+
 <script>
-const cantieri = ["watt","commenda","cortina"]; // Devono corrispondere ai cantiereID
-const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi"];
-const linkCantieri = { "watt": "watt.html", "commenda": "commenda.html", "cortina": "cortina.html" };
+  // 🔹 Sostituisci con i tuoi dati di configurazione Firebase
+  const firebaseConfig = {
+    apiKey: "TUO_API_KEY",
+    authDomain: "TUO_PROGETTO.firebaseapp.com",
+    projectId: "TUO_PROGETTO",
+    storageBucket: "TUO_PROGETTO.appspot.com",
+    messagingSenderId: "xxx",
+    appId: "xxx"
+  };
 
-function getSavedQuantities(cantiere){
-  let data = JSON.parse(localStorage.getItem('quantitaAttrezzi_'+cantiere))||{};
-  attrezzi.forEach(att=>{ if(!(att in data)) data[att]=0; });
-  return data;
-}
+  // Inizializza Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-function updateRiepilogo(){
-  const container=document.getElementById('riepilogoCantieri');
-  container.innerHTML='';
-  cantieri.forEach(cantiere=>{
-    const data=getSavedQuantities(cantiere);
-    const card=document.createElement('div');
-    card.className='riepilogo-card';
-    let html=`<h3>${cantiere.toUpperCase()}</h3><ul>`;
-    attrezzi.forEach(att=>{ html+=`<li><strong>${att}</strong>: ${data[att]}</li>`; });
-    html+=`</ul><button onclick="window.location.href='${linkCantieri[cantiere]}'">Vai a ${cantiere.toUpperCase()}</button>`;
-    card.innerHTML=html;
-    container.appendChild(card);
-  });
-}
+  const cantieri = ["watt","commenda","cortina"];
+  const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi"];
+  const linkCantieri = { "watt": "watt.html", "commenda": "commenda.html", "cortina": "cortina.html" };
 
-// Aggiorna subito e poi ogni secondo
-updateRiepilogo();
-setInterval(updateRiepilogo,1000);
+  // 🔹 Prende i dati dal database
+  async function getQuantities(cantiere){
+    const docRef = db.collection("cantieri").doc(cantiere);
+    const docSnap = await docRef.get();
+    let data = {};
+    if(docSnap.exists){
+      data = docSnap.data();
+    }
+    // Assicura che ci siano tutti gli attrezzi
+    attrezzi.forEach(att => { if(!(att in data)) data[att] = {}; });
+    return data;
+  }
+
+  // 🔹 Aggiorna il riepilogo sul sito
+  async function updateRiepilogo(){
+    const container = document.getElementById('riepilogoCantieri');
+    container.innerHTML = '';
+    for(const cantiere of cantieri){
+      const data = await getQuantities(cantiere);
+      const card = document.createElement('div');
+      card.className = 'riepilogo-card';
+      let html = `<h3>${cantiere.toUpperCase()}</h3><ul>`;
+      attrezzi.forEach(att => {
+        html += `<li><strong>${att}</strong>: `;
+        const attData = data[att];
+        if(Object.keys(attData).length === 0){
+          html += '0';
+        } else {
+          // Mostra utente e quantità
+          const utenti = [];
+          for(const [utente, qty] of Object.entries(attData)){
+            utenti.push(`${utente} (${qty})`);
+          }
+          html += utenti.join(', ');
+        }
+        html += `</li>`;
+      });
+      html += `</ul><button onclick="window.location.href='${linkCantieri[cantiere]}'">Vai a ${cantiere.toUpperCase()}</button>`;
+      card.innerHTML = html;
+      container.appendChild(card);
+    }
+  }
+
+  // 🔹 Aggiorna subito e poi ogni 2 secondi
+  updateRiepilogo();
+  setInterval(updateRiepilogo, 2000);
 </script>
 
 </body>
