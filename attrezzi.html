@@ -60,7 +60,7 @@ button:hover { background:#00cc88; }
       data = docSnap.data();
     }
     // Assicura che ci siano tutti gli attrezzi
-    attrezzi.forEach(att => { if(!(att in data)) data[att] = {}; });
+    attrezzi.forEach(att => { if(!(att in data)) data[att] = 0; });
     return data;
   }
 
@@ -76,10 +76,11 @@ button:hover { background:#00cc88; }
       attrezzi.forEach(att => {
         html += `<li><strong>${att}</strong>: `;
         const attData = data[att];
-        if(Object.keys(attData).length === 0){
+        if(!attData){
           html += '0';
+        } else if(typeof attData === 'number'){
+          html += attData; // vecchio formato numerico
         } else {
-          // Mostra utente e quantità
           const utenti = [];
           for(const [utente, qty] of Object.entries(attData)){
             utenti.push(`${utente} (${qty})`);
