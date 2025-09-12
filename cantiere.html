@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #0b1e3f; /* sfondo blu scuro */
+      background-color: #0b1e3f;
       color: white;
       display: flex;
       flex-direction: column;
@@ -17,26 +17,34 @@
     }
 
     h1 {
-      margin-top: 40px;
-      margin-bottom: 40px;
+      margin: 40px 0;
       font-size: 42px;
-      color: #00ffaa; /* verde evidenziato */
+      color: #00ffaa;
       text-align: center;
     }
 
     /* Container cantieri */
     .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       width: 90%;
       max-width: 1000px;
       margin-bottom: 60px;
     }
 
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
     .box {
       background-color: #082b5c;
       color: white;
+      width: 220px;
       height: 200px;
       display: flex;
       flex-direction: column;
@@ -58,15 +66,27 @@
     }
 
     .box .icon {
-      font-size: 40px; /* grandezza icona */
+      font-size: 40px;
       margin-bottom: 15px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .row {
+        flex-direction: column;
+        align-items: center;
+      }
+      .box {
+        width: 90%;
+        max-width: 320px;
+      }
     }
 
     /* Footer */
     footer {
       background-color: #082b5c;
       color: white;
-      padding: 20px 0 20px 0;
+      padding: 20px 0;
       text-align: center;
       width: 100%;
       margin-top: auto;
@@ -74,43 +94,59 @@
     }
 
     .social-icons a {
-      margin: 0 10px;
+      margin: 0 12px;
       color: white;
       text-decoration: none;
-      font-size: 24px;
+      font-size: 26px;
       transition: 0.3s;
     }
 
     .social-icons a:hover {
       color: #00ffaa;
+      transform: scale(1.2);
     }
   </style>
 </head>
 <body>
 
-<h1>Cantieri Attivi</h1>
+  <h1>Cantieri Attivi</h1>
 
-<div class="container">
-  <div class="box" onclick="location.href='watt.html'">
-    <div class="icon">🏗️</div>
-    <div>Watt</div>
+  <div class="container">
+    <!-- Riga 1 con 3 cantieri -->
+    <div class="row">
+      <div class="box" onclick="location.href='watt.html'">
+        <div class="icon">🏗️</div>
+        <div>Watt</div>
+      </div>
+
+      <div class="box" onclick="location.href='commenda.html'">
+        <div class="icon">🏗️</div>
+        <div>Commenda</div>
+      </div>
+
+      <div class="box" onclick="location.href='cortina.html'">
+        <div class="icon">🏗️</div>
+        <div>Cortina</div>
+      </div>
+    </div>
+
+    <!-- Riga 2 con 2 cantieri centrali -->
+    <div class="row">
+      <div class="box" onclick="location.href='gioia.html'">
+        <div class="icon">🏗️</div>
+        <div>Gioia</div>
+      </div>
+
+      <div class="box" onclick="location.href='mind.html'">
+        <div class="icon">🏗️</div>
+        <div>Mind</div>
+      </div>
+    </div>
   </div>
 
-  <div class="box" onclick="location.href='commenda.html'">
-    <div class="icon">🏗️</div>
-    <div>Commenda</div>
-  </div>
-
-  <div class="box" onclick="location.href='cortina.html'">
-    <div class="icon">🏗️</div>
-    <div>Cortina</div>
-  </div>
-</div>
-
-<footer>
-  <div>© 2025 ARCO SRLS - Tutti i diritti riservati</div>
-  <div class="social-icons">
-</footer>
+  <footer>
+    <div>© 2025 ARCO SRLS - Tutti i diritti riservati</div>
+  </footer>
 
 </body>
 </html>

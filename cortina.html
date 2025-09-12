@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARCO SRLS - Attrezzi Cantiere Watt</title>
+<title>ARCO SRLS - Attrezzi Cantiere Commenda</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#0b1e3f; color:white; padding:20px; }
 h1 { text-align:center; margin-bottom:30px; }
@@ -17,6 +17,10 @@ h1 { text-align:center; margin-bottom:30px; }
 .top-buttons { text-align:center; margin-bottom:20px; }
 .top-buttons button { margin: 0 5px; padding: 10px 20px; border: none; border-radius: 8px; background: #00ffaa; color: #0b1e3f; font-weight: bold; cursor: pointer; }
 .top-buttons button:hover { background: #00cc88; }
+.riepilogo { margin-top:40px; background:#082b5c; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+.riepilogo h2 { color:#00ffaa; text-align:center; margin-bottom:15px;}
+.riepilogo ul { list-style:none; padding:0; margin:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px 20px;}
+.riepilogo li { font-size:16px; padding:6px 10px; background:#0b1e3f; border-radius:8px; text-align:center;}
 </style>
 </head>
 <body>
@@ -25,8 +29,13 @@ h1 { text-align:center; margin-bottom:30px; }
   <button onclick="window.location.href='index.html'">🏠 Home Page</button>
 </div>
 
-<h1>COMMENDA Attrezzi</h1>
+<h1>Cortina Attrezzi</h1>
 <div class="grid" id="gridAttrezzi"></div>
+
+<div class="riepilogo">
+  <h2>Riepilogo Quantità</h2>
+  <ul id="riepilogoList"></ul>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
@@ -44,11 +53,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const cantiereID = "commenda";const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi"];
+const cantiereID = "cortina";
+const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi","Smerigliatrice"];
 const container = document.getElementById('gridAttrezzi');
+const riepilogoList = document.getElementById('riepilogoList');
 let dataQuantities = {};
 
-// Crea le card
 attrezzi.forEach(att => {
   const card = document.createElement('div');
   card.className = 'card';
@@ -71,7 +81,6 @@ attrezzi.forEach(att => {
   input.onchange = () => updateQuantity(att, parseInt(input.value));
 });
 
-// Listener realtime
 const docRef = doc(db,"cantieri",cantiereID);
 onSnapshot(docRef, snap => {
   if(snap.exists()){
@@ -80,13 +89,22 @@ onSnapshot(docRef, snap => {
       const card = [...container.children].find(c => c.querySelector('h2').textContent===att);
       card.querySelector('input').value = dataQuantities[att] || 0;
     });
+    aggiornaRiepilogo();
   }
 });
 
-// Aggiorna Firestore
 async function updateQuantity(att, value){
   dataQuantities[att] = value;
   await setDoc(docRef, dataQuantities);
+}
+
+function aggiornaRiepilogo(){
+  riepilogoList.innerHTML = "";
+  attrezzi.forEach(att => {
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${att}</strong>: ${dataQuantities[att] || 0}`;
+    riepilogoList.appendChild(li);
+  });
 }
 </script>
 </body>
