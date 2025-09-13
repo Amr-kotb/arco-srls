@@ -21,6 +21,24 @@ h1 { text-align:center; margin-bottom:30px; }
 .riepilogo h2 { color:#00ffaa; text-align:center; margin-bottom:15px;}
 .riepilogo ul { list-style:none; padding:0; margin:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px 20px;}
 .riepilogo li { font-size:16px; padding:6px 10px; background:#0b1e3f; border-radius:8px; text-align:center;}
+
+/* Indicatore salvataggio */
+.save-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #00cc88;
+  color: #003366;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.save-indicator.visible {
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -31,6 +49,9 @@ h1 { text-align:center; margin-bottom:30px; }
 
 <h1>COMMENDA Attrezzi</h1>
 <div class="grid" id="gridAttrezzi"></div>
+
+<!-- Indicatore salvataggio -->
+<div class="save-indicator" id="saveIndicator">Dati salvati ✔</div>
 
 <div class="riepilogo">
   <h2>Riepilogo Quantità</h2>
@@ -57,6 +78,7 @@ const cantiereID = "commenda";
 const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi","Smerigliatrice"];
 const container = document.getElementById('gridAttrezzi');
 const riepilogoList = document.getElementById('riepilogoList');
+const saveIndicator = document.getElementById('saveIndicator');
 let dataQuantities = {};
 
 attrezzi.forEach(att => {
@@ -87,7 +109,9 @@ onSnapshot(docRef, snap => {
     dataQuantities = snap.data();
     attrezzi.forEach(att => {
       const card = [...container.children].find(c => c.querySelector('h2').textContent===att);
-      card.querySelector('input').value = dataQuantities[att] || 0;
+      if (card) {
+        card.querySelector('input').value = dataQuantities[att] || 0;
+      }
     });
     aggiornaRiepilogo();
   }
@@ -96,6 +120,17 @@ onSnapshot(docRef, snap => {
 async function updateQuantity(att, value){
   dataQuantities[att] = value;
   await setDoc(docRef, dataQuantities);
+  
+  // Mostra indicatore salvataggio
+  showSaveIndicator();
+}
+
+// Funzione per mostrare l'indicatore di salvataggio
+function showSaveIndicator() {
+  saveIndicator.classList.add('visible');
+  setTimeout(() => {
+    saveIndicator.classList.remove('visible');
+  }, 2000);
 }
 
 function aggiornaRiepilogo(){
