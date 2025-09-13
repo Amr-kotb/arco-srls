@@ -16,7 +16,14 @@ h1 { text-align:center; margin-bottom:30px; color:#00ffaa; font-size:1.8em; }
 button { margin:5px 5px 0 0; padding:8px 14px; border:none; border-radius:8px; background:#00ffaa; color:#0b1e3f; font-weight:bold; cursor:pointer; font-size:0.95em; }
 button:hover { background:#00cc88; }
 .top-buttons { text-align:center; margin-bottom:20px; }
-@media (max-width:600px) { body { padding:10px; } h1 { font-size:1.5em; } .riepilogo-card { padding:12px; } button { padding:6px 12px; font-size:0.85em; } .riepilogo-card li { font-size:0.9em; } .riepilogo-card ul { grid-template-columns: 1fr; } }
+@media (max-width:600px) {
+  body { padding:10px; }
+  h1 { font-size:1.5em; }
+  .riepilogo-card { padding:12px; }
+  button { padding:6px 12px; font-size:0.85em; }
+  .riepilogo-card li { font-size:0.9em; }
+  .riepilogo-card ul { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -46,14 +53,23 @@ const db = getFirestore(app);
 
 const cantieri = ["watt","commenda","cortina","gioia","mind"];
 const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi","Smerigliatrice"];
-const linkCantieri = { "watt":"watt.html", "commenda":"commenda.html", "cortina":"cortina.html", "gioia":"gioia.html", "mind":"mind.html" };
+const linkCantieri = { 
+  "watt": "watt.html", 
+  "commenda": "commenda.html", 
+  "cortina": "cortina.html", 
+  "gioia": "gioia.html",
+  "mind": "mind.html"
+};
+
 const container = document.getElementById('riepilogoCantieri');
 
 cantieri.forEach(cantiere => {
   const docRef = doc(db, "cantieri", cantiere);
+
   onSnapshot(docRef, snap => {
-    let data = snap.exists() ? snap.data() : {};
+    const data = snap.exists() ? snap.data() : {};
     attrezzi.forEach(att => { if(!(att in data)) data[att]=0; });
+
     let card = document.getElementById(`card-${cantiere}`);
     if(!card){
       card = document.createElement('div');
@@ -61,8 +77,11 @@ cantieri.forEach(cantiere => {
       card.className = 'riepilogo-card';
       container.appendChild(card);
     }
+
     let html = `<h3>${cantiere.toUpperCase()}</h3><ul>`;
-    attrezzi.forEach(att => html += `<li><strong>${att}</strong>: ${data[att]}</li>`);
+    attrezzi.forEach(att => {
+      html += `<li><strong>${att}</strong>: ${data[att]}</li>`;
+    });
     html += `</ul><button onclick="window.location.href='${linkCantieri[cantiere]}'">Vai a ${cantiere.toUpperCase()}</button>`;
     card.innerHTML = html;
   });

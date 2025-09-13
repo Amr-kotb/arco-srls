@@ -41,6 +41,7 @@ h1 { text-align:center; margin-bottom:30px; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
+// 🔹 Config Firebase
 const firebaseConfig = {
   apiKey: "TUO_API_KEY",
   authDomain: "TUO_PROGETTO.firebaseapp.com",
@@ -53,12 +54,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const cantiereID = "watt";
+// 🔹 Config cantieri
+const cantiereID = "watt"; // Modifica questo per ogni cantiere
 const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi","Smerigliatrice"];
+
 const container = document.getElementById('gridAttrezzi');
 const riepilogoList = document.getElementById('riepilogoList');
 let dataQuantities = {};
 
+// 🔹 Crea le card attrezzi
 attrezzi.forEach(att => {
   const card = document.createElement('div');
   card.className = 'card';
@@ -81,23 +85,28 @@ attrezzi.forEach(att => {
   input.onchange = () => updateQuantity(att, parseInt(input.value));
 });
 
+// 🔹 Listener realtime Firestore
 const docRef = doc(db,"cantieri",cantiereID);
 onSnapshot(docRef, snap => {
-  dataQuantities = snap.exists() ? snap.data() : {};
+  if(snap.exists()){
+    dataQuantities = snap.data();
 
-  attrezzi.forEach(att => {
-    const card = [...container.children].find(c => c.querySelector('h2').textContent===att);
-    card.querySelector('input').value = dataQuantities[att] || 0;
-  });
+    attrezzi.forEach(att => {
+      const card = [...container.children].find(c => c.querySelector('h2').textContent===att);
+      card.querySelector('input').value = dataQuantities[att] || 0;
+    });
 
-  aggiornaRiepilogo();
+    aggiornaRiepilogo();
+  }
 });
 
+// 🔹 Aggiorna Firestore (tutti gli utenti vedranno i cambiamenti)
 async function updateQuantity(att, value){
   dataQuantities[att] = value;
   await setDoc(docRef, dataQuantities);
 }
 
+// 🔹 Aggiorna riepilogo
 function aggiornaRiepilogo(){
   riepilogoList.innerHTML = "";
   attrezzi.forEach(att => {
