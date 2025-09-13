@@ -6,7 +6,7 @@
 <title>ARCO SRLS - Attrezzi Cantiere Watt</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#0b1e3f; color:white; padding:20px; }
-h1 { text-align:center; margin-bottom:30px; }
+h1 { text-align:center; margin-bottom:30px; color:#00ffaa; }
 .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px;}
 .card{background:#082b5c;border-radius:12px;display:flex;flex-direction:column;align-items:center;padding:15px;text-align:center;min-height:260px;}
 .card img{width:190px;height:140px;object-fit:contain;margin-bottom:10px;border-radius:8px;}
@@ -65,7 +65,7 @@ h1 { text-align:center; margin-bottom:30px; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getFirestore, doc, onSnapshot, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "TUO_API_KEY",
@@ -85,6 +85,10 @@ const container = document.getElementById('gridAttrezzi');
 const riepilogoList = document.getElementById('riepilogoList');
 let dataQuantities = {};
 
+// Assicuriamoci che il documento esista
+const docRef = doc(db,"cantieri",cantiereID);
+setDoc(docRef, {}, { merge: true });
+
 // Crea le card attrezzi
 attrezzi.forEach(att => {
   const card = document.createElement('div');
@@ -103,18 +107,18 @@ attrezzi.forEach(att => {
   const btnInc = card.querySelectorAll('button')[1];
   const btnDec = card.querySelectorAll('button')[0];
 
-  btnInc.onclick = () => updateQuantity(att, parseInt(input.value)+1);
-  btnDec.onclick = () => updateQuantity(att, Math.max(0, parseInt(input.value)-1));
-  input.onchange = () => updateQuantity(att, parseInt(input.value));
+  // Incremento/Decremento con update atomico
+  btnInc.onclick = () => incrementQuantity(att, 1);
+  btnDec.onclick = () => incrementQuantity(att, -1);
+  input.onchange = () => setQuantity(att, parseInt(input.value));
 });
 
 // Listener realtime Firestore
-const docRef = doc(db,"cantieri",cantiereID);
 onSnapshot(docRef, snap => {
   if(snap.exists()){
     dataQuantities = snap.data();
 
-    // Aggiorna input nelle card
+    // Aggiorna input nelle card senza sovrascrivere gli altri utenti
     attrezzi.forEach(att => {
       const card = [...container.children].find(c => c.querySelector('h2').textContent===att);
       card.querySelector('input').value = dataQuantities[att] || 0;
@@ -125,10 +129,18 @@ onSnapshot(docRef, snap => {
   }
 });
 
-// Aggiorna Firestore
-async function updateQuantity(att, value){
-  dataQuantities[att] = value;
-  await setDoc(docRef, dataQuantities);
+// Funzione per incrementare/decrementare atomico
+async function incrementQuantity(att, amount){
+  const fieldUpdate = {};
+  fieldUpdate[att] = increment(amount);
+  await updateDoc(docRef, fieldUpdate);
+}
+
+// Funzione per impostare quantità precisa
+async function setQuantity(att, value){
+  const fieldUpdate = {};
+  fieldUpdate[att] = value;
+  await updateDoc(docRef, fieldUpdate);
 }
 
 // Funzione per aggiornare il riepilogo
