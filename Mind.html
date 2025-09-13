@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARCO SRLS - Attrezzi Cantiere Commenda</title>
+<title>ARCO SRLS - Attrezzi Cantiere Watt</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#0b1e3f; color:white; padding:20px; }
 h1 { text-align:center; margin-bottom:30px; }
@@ -21,64 +21,70 @@ h1 { text-align:center; margin-bottom:30px; }
 .riepilogo h2 { color:#00ffaa; text-align:center; margin-bottom:15px;}
 .riepilogo ul { list-style:none; padding:0; margin:0; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px 20px;}
 .riepilogo li { font-size:16px; padding:6px 10px; background:#0b1e3f; border-radius:8px; text-align:center;}
+.save-indicator { position: fixed; bottom: 20px; right: 20px; background: #00cc88; color: #003366; padding: 10px 15px; border-radius: 8px; font-weight: bold; opacity: 0; transition: opacity 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.3);}
+.save-indicator.visible { opacity: 1;}
 </style>
 </head>
 <body>
-
 <div class="top-buttons">
   <button onclick="window.location.href='index.html'">🏠 Home Page</button>
+  <button onclick="window.location.href='riepilogo.html'">📊 Riepilogo Tutti Cantieri</button>
 </div>
-
-<h1>Mind Attrezzi</h1>
+<h1>mind Attrezzi</h1>
 <div class="grid" id="gridAttrezzi"></div>
-
-<div class="riepilogo">
-  <h2>Riepilogo Quantità</h2>
-  <ul id="riepilogoList"></ul>
-</div>
+<div class="save-indicator" id="saveIndicator">Dati salvati ✔</div>
+<div class="riepilogo"><h2>Riepilogo Quantità</h2><ul id="riepilogoList"></ul></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "TUO_API_KEY",
-  authDomain: "TUO_PROGETTO.firebaseapp.com",
-  projectId: "TUO_PROGETTO",
-  storageBucket: "TUO_PROGETTO.appspot.com",
-  messagingSenderId: "xxx",
-  appId: "xxx"
+  apiKey: "AIzaSyDhM0IEuh_WRTy2KTkt4ukhRflyt-5-ebE",
+  authDomain: "sample-firebase-ai-app-33b26.firebaseapp.com",
+  projectId: "sample-firebase-ai-app-33b26",
+  storageBucket: "sample-firebase-ai-app-33b26.firebasestorage.app",
+  messagingSenderId: "219731070121",
+  appId: "1:219731070121:web:ec56f1b2c4f45423ecedb8"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const cantiereID = "Mind";
+const cantiereID = "mind";
 const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi","Smerigliatrice"];
 const container = document.getElementById('gridAttrezzi');
 const riepilogoList = document.getElementById('riepilogoList');
+const saveIndicator = document.getElementById('saveIndicator');
 let dataQuantities = {};
 
 attrezzi.forEach(att => {
   const card = document.createElement('div');
   card.className = 'card';
-  card.innerHTML = `
-    <img src="./attrezzi/${att.toLowerCase()}.png" alt="${att}">
+  card.innerHTML = `<img src="./attrezzi/${att.toLowerCase()}.png" alt="${att}">
     <h2>${att}</h2>
     <div class="quantity-container">
-      <button>-</button>
+      <button class="dec">-</button>
       <input type="number" value="0" min="0">
-      <button>+</button>
+      <button class="inc">+</button>
     </div>`;
   container.appendChild(card);
 
   const input = card.querySelector('input');
-  const btnInc = card.querySelectorAll('button')[1];
-  const btnDec = card.querySelectorAll('button')[0];
+  const btnInc = card.querySelector('.inc');
+  const btnDec = card.querySelector('.dec');
 
-  btnInc.onclick = () => updateQuantity(att, parseInt(input.value)+1);
-  btnDec.onclick = () => updateQuantity(att, Math.max(0, parseInt(input.value)-1));
-  input.onchange = () => updateQuantity(att, parseInt(input.value));
+  btnInc.addEventListener('click', () => {
+    input.value = (parseInt(input.value) || 0) + 1;
+    updateQuantity(att, parseInt(input.value));
+  });
+  btnDec.addEventListener('click', () => {
+    input.value = Math.max(0, (parseInt(input.value) || 0) - 1);
+    updateQuantity(att, parseInt(input.value));
+  });
+  input.addEventListener('change', () => {
+    input.value = Math.max(0, parseInt(input.value) || 0);
+    updateQuantity(att, parseInt(input.value));
+  });
 });
 
 const docRef = doc(db,"cantieri",cantiereID);
@@ -87,17 +93,23 @@ onSnapshot(docRef, snap => {
     dataQuantities = snap.data();
     attrezzi.forEach(att => {
       const card = [...container.children].find(c => c.querySelector('h2').textContent===att);
-      card.querySelector('input').value = dataQuantities[att] || 0;
+      if (card) card.querySelector('input').value = dataQuantities[att] || 0;
     });
     aggiornaRiepilogo();
   }
 });
 
 async function updateQuantity(att, value){
+  if (isNaN(value)) value = 0;
   dataQuantities[att] = value;
-  await setDoc(docRef, dataQuantities);
+  try { await setDoc(docRef, dataQuantities, { merge: true }); showSaveIndicator(); }
+  catch(e) { console.error("Errore salvataggio:", e); }
 }
 
+function showSaveIndicator() {
+  saveIndicator.classList.add('visible');
+  setTimeout(() => saveIndicator.classList.remove('visible'), 2000);
+}
 function aggiornaRiepilogo(){
   riepilogoList.innerHTML = "";
   attrezzi.forEach(att => {
