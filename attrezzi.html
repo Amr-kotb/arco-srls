@@ -3,42 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARCO SRLS - Riepilogo Cantieri Realtime</title>
+<title>ARCO SRLS - Riepilogo Cantieri</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#0b1e3f; color:white; padding:20px; }
 h1 { text-align:center; margin-bottom:30px; color:#00ffaa; font-size:1.8em; }
-
-.riepilogo-cantieri {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-  gap:20px;
-}
-.riepilogo-card {
-  background:#082b5c;
-  border-radius:12px;
-  padding:15px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.5);
-  text-align:center;
-  transition: transform 0.2s;
-}
+.riepilogo-cantieri { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; }
+.riepilogo-card { background:#082b5c; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.5); text-align:center; transition: transform 0.2s; }
 .riepilogo-card:hover { transform: translateY(-5px); }
 .riepilogo-card h3 { color:#00ffaa; margin-bottom:10px; font-size:1.3em; }
 .riepilogo-card ul { list-style:none; padding:0; margin:0; display:grid; grid-template-columns: 1fr 1fr; gap:5px 15px; }
 .riepilogo-card li { margin:4px 0; font-size:1em; word-wrap: break-word; }
-
 button { margin:5px 5px 0 0; padding:8px 14px; border:none; border-radius:8px; background:#00ffaa; color:#0b1e3f; font-weight:bold; cursor:pointer; font-size:0.95em; }
 button:hover { background:#00cc88; }
-
 .top-buttons { text-align:center; margin-bottom:20px; }
-
-@media (max-width:600px) {
-  body { padding:10px; }
-  h1 { font-size:1.5em; }
-  .riepilogo-card { padding:12px; }
-  button { padding:6px 12px; font-size:0.85em; }
-  .riepilogo-card li { font-size:0.9em; }
-  .riepilogo-card ul { grid-template-columns: 1fr; }
-}
+@media (max-width:600px) { body { padding:10px; } h1 { font-size:1.5em; } .riepilogo-card { padding:12px; } button { padding:6px 12px; font-size:0.85em; } .riepilogo-card li { font-size:0.9em; } .riepilogo-card ul { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -47,14 +25,13 @@ button:hover { background:#00cc88; }
   <button onclick="window.location.href='index.html'">🏠 Home Page</button>
 </div>
 
-<h1>Riepilogo Quantità Attrezzi - Tutti i Cantieri (Realtime)</h1>
+<h1>Riepilogo Quantità Attrezzi - Tutti i Cantieri</h1>
 <div class="riepilogo-cantieri" id="riepilogoCantieri"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-// 🔹 Config Firebase
 const firebaseConfig = {
   apiKey: "TUO_API_KEY",
   authDomain: "TUO_PROGETTO.firebaseapp.com",
@@ -69,25 +46,14 @@ const db = getFirestore(app);
 
 const cantieri = ["watt","commenda","cortina","gioia","mind"];
 const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi","Smerigliatrice"];
-
-const linkCantieri = { 
-  "watt": "watt.html", 
-  "commenda": "commenda.html", 
-  "cortina": "cortina.html", 
-  "gioia": "gioia.html",
-  "mind": "mind.html"
-};
-
+const linkCantieri = { "watt":"watt.html", "commenda":"commenda.html", "cortina":"cortina.html", "gioia":"gioia.html", "mind":"mind.html" };
 const container = document.getElementById('riepilogoCantieri');
 
-// 🔹 Per ogni cantiere mettiamo un listener realtime
 cantieri.forEach(cantiere => {
   const docRef = doc(db, "cantieri", cantiere);
-
   onSnapshot(docRef, snap => {
     let data = snap.exists() ? snap.data() : {};
     attrezzi.forEach(att => { if(!(att in data)) data[att]=0; });
-
     let card = document.getElementById(`card-${cantiere}`);
     if(!card){
       card = document.createElement('div');
@@ -95,11 +61,8 @@ cantieri.forEach(cantiere => {
       card.className = 'riepilogo-card';
       container.appendChild(card);
     }
-
     let html = `<h3>${cantiere.toUpperCase()}</h3><ul>`;
-    attrezzi.forEach(att => {
-      html += `<li><strong>${att}</strong>: ${data[att]}</li>`;
-    });
+    attrezzi.forEach(att => html += `<li><strong>${att}</strong>: ${data[att]}</li>`);
     html += `</ul><button onclick="window.location.href='${linkCantieri[cantiere]}'">Vai a ${cantiere.toUpperCase()}</button>`;
     card.innerHTML = html;
   });

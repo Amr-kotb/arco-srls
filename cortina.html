@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARCO SRLS - Attrezzi Cantiere Cortina</title>
+<title>ARCO SRLS - Attrezzi Cantiere Commenda</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#0b1e3f; color:white; padding:20px; }
 h1 { text-align:center; margin-bottom:30px; }
@@ -29,7 +29,7 @@ h1 { text-align:center; margin-bottom:30px; }
   <button onclick="window.location.href='index.html'">🏠 Home Page</button>
 </div>
 
-<h1>CORTINA Attrezzi</h1>
+<h1>Cortina Attrezzi</h1>
 <div class="grid" id="gridAttrezzi"></div>
 
 <div class="riepilogo">
@@ -41,7 +41,6 @@ h1 { text-align:center; margin-bottom:30px; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-// 🔹 Config Firebase
 const firebaseConfig = {
   apiKey: "TUO_API_KEY",
   authDomain: "TUO_PROGETTO.firebaseapp.com",
@@ -54,13 +53,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const cantiereID = "cortina"; // ID cantiere unico
+const cantiereID = "cortina";
 const attrezzi = ["Avvitatore","Trapano","Laser","Batteria","Carica Batteria","Seghetto","Sparachiodi","Smerigliatrice"];
 const container = document.getElementById('gridAttrezzi');
 const riepilogoList = document.getElementById('riepilogoList');
 let dataQuantities = {};
 
-// 🔹 Creazione card per ogni attrezzo
 attrezzi.forEach(att => {
   const card = document.createElement('div');
   card.className = 'card';
@@ -78,36 +76,28 @@ attrezzi.forEach(att => {
   const btnInc = card.querySelectorAll('button')[1];
   const btnDec = card.querySelectorAll('button')[0];
 
-  // 🔹 Aggiornamento automatico quantità
   btnInc.onclick = () => updateQuantity(att, parseInt(input.value)+1);
   btnDec.onclick = () => updateQuantity(att, Math.max(0, parseInt(input.value)-1));
   input.onchange = () => updateQuantity(att, parseInt(input.value));
 });
 
-// 🔹 Listener realtime Firestore per aggiornamenti da tutti gli utenti
 const docRef = doc(db,"cantieri",cantiereID);
 onSnapshot(docRef, snap => {
-  if(snap.exists()){
-    dataQuantities = snap.data();
+  dataQuantities = snap.exists() ? snap.data() : {};
 
-    // Aggiorna input nelle card
-    attrezzi.forEach(att => {
-      const card = [...container.children].find(c => c.querySelector('h2').textContent===att);
-      card.querySelector('input').value = dataQuantities[att] || 0;
-    });
+  attrezzi.forEach(att => {
+    const card = [...container.children].find(c => c.querySelector('h2').textContent===att);
+    card.querySelector('input').value = dataQuantities[att] || 0;
+  });
 
-    // Aggiorna riepilogo
-    aggiornaRiepilogo();
-  }
+  aggiornaRiepilogo();
 });
 
-// 🔹 Funzione per aggiornare Firestore (tutti gli utenti vedranno i cambiamenti)
 async function updateQuantity(att, value){
   dataQuantities[att] = value;
-  await setDoc(docRef, dataQuantities); // Salvataggio automatico in realtime
+  await setDoc(docRef, dataQuantities);
 }
 
-// 🔹 Funzione per aggiornare il riepilogo
 function aggiornaRiepilogo(){
   riepilogoList.innerHTML = "";
   attrezzi.forEach(att => {
