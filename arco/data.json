@@ -1,9 +1,0 @@
-{
-  "cantieri": {
-    "watt": { "Avvitatore": 0, "Trapano": 0, "Laser": 0, "Batteria": 0, "Carica Batteria": 0, "Seghetto": 0, "Sparachiodi": 0, "Smerigliatrice": 0 },
-    "commenda": { "Avvitatore": 0, "Trapano": 0, "Laser": 0, "Batteria": 0, "Carica Batteria": 0, "Seghetto": 0, "Sparachiodi": 0, "Smerigliatrice": 0 },
-    "cortina": { "Avvitatore": 0, "Trapano": 0, "Laser": 0, "Batteria": 0, "Carica Batteria": 0, "Seghetto": 0, "Sparachiodi": 0, "Smerigliatrice": 0 },
-    "gioia": { "Avvitatore": 0, "Trapano": 0, "Laser": 0, "Batteria": 0, "Carica Batteria": 0, "Seghetto": 0, "Sparachiodi": 0, "Smerigliatrice": 0 },
-    "mind": { "Avvitatore": 0, "Trapano": 0, "Laser": 0, "Batteria": 0, "Carica Batteria": 0, "Seghetto": 0, "Sparachiodi": 0, "Smerigliatrice": 0 }
-  }
-}
